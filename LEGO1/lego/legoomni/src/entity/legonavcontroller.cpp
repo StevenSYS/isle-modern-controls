@@ -861,7 +861,7 @@ MxLong LegoNavController::Notify(MxParam& p_param)
 						LegoOmni::GetInstance()->Start(&action);
 					}
 					break;
-				case 'A':
+				case VK_LEFT:
 					if (g_animationCalcStep == 1) {
 						Lego()->m_unk0x13c = TRUE;
 						AnimationManager()->FUN_10060570(TRUE);
@@ -880,7 +880,7 @@ MxLong LegoNavController::Notify(MxParam& p_param)
 				case 'C':
 					g_locationCalcStep = 1;
 					break;
-				case 'D':
+				case VK_RIGHT:
 					m_unk0x60 = -1.0;
 					break;
 				case 'F':
@@ -942,7 +942,7 @@ MxLong LegoNavController::Notify(MxParam& p_param)
 						g_resetPlants = FALSE;
 					}
 					break;
-				case 'S':
+				case VK_DOWN:
 					g_enableMusic = g_enableMusic == FALSE;
 					BackgroundAudioManager()->Enable(g_enableMusic);
 					break;
@@ -961,7 +961,7 @@ MxLong LegoNavController::Notify(MxParam& p_param)
 					g_nextAnimation = 0;
 					g_animationCalcStep = 1;
 					break;
-				case 'W': {
+				case VK_UP: {
 					MxMatrix mat;
 					LegoROI* roi = LegoOmni::GetInstance()->GetVideoManager()->GetViewROI();
 					const float* position = roi->GetWorldPosition();
