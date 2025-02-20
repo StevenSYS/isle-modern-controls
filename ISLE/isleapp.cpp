@@ -35,11 +35,10 @@ DECOMP_SIZE_ASSERT(IsleApp, 0x8c)
 // GLOBAL: ISLE 0x410030
 IsleApp* g_isle = NULL;
 
-// GLOBAL: ISLE 0x410034
-unsigned char g_mousedown = 0;
-
 // GLOBAL: ISLE 0x410038
 unsigned char g_mousemoved = 0;
+
+BOOL g_mouselocked = FALSE;
 
 // GLOBAL: ISLE 0x41003c
 BOOL g_closed = FALSE;
@@ -246,7 +245,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			soundReady = TRUE;
 			break;
 		}
-		Sleep(500);
 	}
 
 	// Throw error if sound unavailable
@@ -290,7 +288,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 	LoadAcceleratorsA(hInstance, "AppAccel");
 
 	MSG msg;
-
+	
 	while (!g_closed) {
 		while (!PeekMessageA(&msg, NULL, 0, 0, PM_NOREMOVE)) {
 			if (g_isle) {
@@ -325,12 +323,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 				break;
 			}
 
-			if (g_mousedown && g_mousemoved && g_isle) {
-				g_isle->Tick(0);
-			}
-
 			if (g_mousemoved) {
 				g_mousemoved = FALSE;
+				if (g_mouselocked) {
+					SetCursorPos(317, 240);
+					g_isle->Tick(0);
+				}
 			}
 		}
 	}
@@ -492,12 +490,19 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		type = c_notificationTimer;
 		break;
 	case WM_LBUTTONDOWN:
-		g_mousedown = 1;
 		type = c_notificationButtonDown;
 		break;
 	case WM_LBUTTONUP:
-		g_mousedown = 0;
 		type = c_notificationButtonUp;
+		break;
+	case WM_RBUTTONUP:
+		g_mouselocked = !g_mouselocked;
+		if (g_mouselocked) {
+			type = c_notificationMouseLocked;
+		}
+		else {
+			type = c_notificationMouseUnlocked;
+		}
 		break;
 	case WM_ISLE_SETCURSOR:
 		if (g_isle) {

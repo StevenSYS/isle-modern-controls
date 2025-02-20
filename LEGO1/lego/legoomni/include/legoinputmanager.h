@@ -97,6 +97,7 @@ public:
 	// FUNCTION: LEGO1 0x1005b8c0
 	MxResult PutData() override { return SUCCESS; } // vtable+0x4c
 
+
 	MxResult Create(HWND p_hwnd);
 	void Destroy() override;
 	void CreateAndAcquireKeyboard(HWND p_hwnd);
@@ -159,7 +160,7 @@ private:
 	IDirectInputDevice* m_directInputDevice; // 0x90
 	MxBool m_kbStateSuccess;                 // 0x94
 	MxU8 m_keyboardState[256];               // 0x95
-	MxBool m_unk0x195;                       // 0x195
+	MxBool m_turnLock;                       // 0x195
 	MxS32 m_joyid;                           // 0x198
 	MxS32 m_joystickIndex;                   // 0x19c
 	JOYCAPS m_joyCaps;                       // 0x200

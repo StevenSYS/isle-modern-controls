@@ -36,7 +36,7 @@ public:
 		return !strcmp(p_name, ClassName()) || MxCore::IsA(p_name);
 	}
 
-	void SetTargets(int p_hPos, int p_vPos, MxBool p_accel);
+	void SetTargets(int p_hPos, MxBool p_accel);
 	void SetControlMax(int p_hMax, int p_vMax);
 	void SetToDefaultParams();
 	MxBool CalculateNewPosDir(

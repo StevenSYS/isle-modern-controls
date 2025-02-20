@@ -48,7 +48,7 @@ DECOMP_SIZE_ASSERT(LegoNavController, 0x70)
 //////////////////////////////////////////////////////////////////////
 
 // GLOBAL: LEGO1 0x100f4c28
-int LegoNavController::g_defdeadZone = 40;
+int LegoNavController::g_defdeadZone = 0;
 
 // GLOBAL: LEGO1 0x100f4c2c
 float LegoNavController::g_defzeroThreshold = 0.001f;
@@ -78,7 +78,7 @@ float LegoNavController::g_defmaxLinearDeccel = 50.0f;
 float LegoNavController::g_defmaxRotationalDeccel = 50.0f;
 
 // GLOBAL: LEGO1 0x100f4c50
-float LegoNavController::g_defrotSensitivity = 0.4f;
+float LegoNavController::g_defrotSensitivity = 500.0f;
 
 // GLOBAL: LEGO1 0x100f4c54
 MxBool LegoNavController::g_defuseRotationalVel = FALSE;
@@ -238,7 +238,7 @@ void LegoNavController::SetDefaults(
 }
 
 // FUNCTION: LEGO1 0x10054e40
-void LegoNavController::SetTargets(int p_hPos, int p_vPos, MxBool p_accel)
+void LegoNavController::SetTargets(int p_hPos, MxBool p_accel)
 {
 	if (m_trackDefault != FALSE) {
 		SetToDefaultParams();
@@ -246,14 +246,10 @@ void LegoNavController::SetTargets(int p_hPos, int p_vPos, MxBool p_accel)
 
 	if (p_accel != FALSE) {
 		m_targetRotationalVel = CalculateNewTargetVel(p_hPos, m_hMax / 2, m_maxRotationalVel);
-		m_targetLinearVel = CalculateNewTargetVel(m_vMax - p_vPos, m_vMax / 2, m_maxLinearVel);
 		m_rotationalAccel = CalculateNewAccel(p_hPos, m_hMax / 2, m_maxRotationalAccel, (int) m_minRotationalAccel);
-		m_linearAccel = CalculateNewAccel(m_vMax - p_vPos, m_vMax / 2, m_maxLinearAccel, (int) m_minLinearAccel);
 	}
 	else {
 		m_targetRotationalVel = 0;
-		m_targetLinearVel = 0;
-		m_linearAccel = m_maxLinearDeccel;
 		m_rotationalAccel = m_maxRotationalDeccel;
 	}
 }
@@ -365,7 +361,7 @@ MxBool LegoNavController::CalculateNewPosDir(
 			delta_rad = DTOR(m_rotationalVel * deltaTime);
 		}
 		else {
-			delta_rad = DTOR(m_rotationalVel * m_rotSensitivity);
+			delta_rad = DTOR((m_rotationalVel * deltaTime) * m_rotSensitivity);
 		}
 
 		if (p_und != NULL && (*p_und)[1] < 0.0f) {
@@ -587,21 +583,6 @@ MxResult LegoNavController::ProcessKeyboardInput()
 
 	m_unk0x6c = TRUE;
 
-	MxS32 hMax;
-	switch (keyFlags & LegoInputManager::c_leftOrRight) {
-	case LegoInputManager::c_left:
-		hMax = 0;
-		break;
-	case LegoInputManager::c_right:
-		hMax = m_hMax;
-		break;
-	default:
-		m_targetRotationalVel = 0.0;
-		m_rotationalAccel = m_maxRotationalDeccel;
-		bool1 = TRUE;
-		break;
-	}
-
 	MxS32 vMax;
 	switch (keyFlags & LegoInputManager::c_upOrDown) {
 	case LegoInputManager::c_up:
@@ -619,12 +600,6 @@ MxResult LegoNavController::ProcessKeyboardInput()
 
 	MxFloat val = keyFlags & LegoInputManager::c_bit5 ? 1.0f : 4.0f;
 	MxFloat val2 = keyFlags & LegoInputManager::c_bit5 ? 1.0f : 2.0f;
-
-	if (!bool1) {
-		m_targetRotationalVel = CalculateNewTargetVel(hMax, m_hMax / 2, m_maxRotationalVel);
-		m_rotationalAccel =
-			CalculateNewAccel(hMax, m_hMax / 2, m_maxRotationalAccel / val, (int) (m_minRotationalAccel / val2));
-	}
 
 	if (!bool2) {
 		m_targetLinearVel = CalculateNewTargetVel(m_vMax - vMax, m_vMax / 2, m_maxLinearVel);

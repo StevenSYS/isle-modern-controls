@@ -4,6 +4,7 @@
 #include "legonavcontroller.h"
 #include "legopointofviewcontroller.h"
 #include "legosoundmanager.h"
+#include "legoinputmanager.h"
 #include "misc.h"
 #include "mxmisc.h"
 #include "mxticklemanager.h"
@@ -134,7 +135,7 @@ void LegoPointOfViewController::LeftDrag(int p_x, int p_y)
 // FUNCTION: LEGO1 0x10065900
 void LegoPointOfViewController::AffectPointOfView()
 {
-	m_nav->SetTargets(GetButtonX(), GetButtonY(), GetIsButtonDown());
+	m_nav->SetTargets(GetButtonX(), GetIsButtonDown());
 }
 
 // FUNCTION: LEGO1 0x10065930
@@ -163,7 +164,7 @@ MxResult LegoPointOfViewController::Tickle()
 				pov->GetWorldUp(),
 				pov->GetWorldVelocity()
 			);
-
+			
 			g_unk0x100f75ac = FALSE;
 		}
 		else {
@@ -184,7 +185,7 @@ MxResult LegoPointOfViewController::Tickle()
 			}
 		}
 	}
-
+	
 	return SUCCESS;
 }
 

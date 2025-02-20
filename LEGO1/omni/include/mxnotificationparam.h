@@ -31,7 +31,9 @@ enum NotificationId {
 	c_notificationNewPresenter = 21,
 	c_notificationType22 = 22,
 	c_notificationType23 = 23,
-	c_notificationTransitioned = 24
+	c_notificationTransitioned = 24,
+	c_notificationMouseLocked = 25,
+	c_notificationMouseUnlocked = 26,
 };
 
 // VTABLE: LEGO1 0x100d56e0

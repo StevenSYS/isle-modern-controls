@@ -50,22 +50,10 @@ MxLong LegoCameraController::Notify(MxParam& p_param)
 				((LegoEventNotificationParam&) p_param).GetY()
 			));
 		}
-		else if (((((LegoEventNotificationParam&) p_param).GetModifier()) & LegoEventNotificationParam::c_rButtonState) == 0) {
-			OnRButtonUp(MxPoint32(
-				((LegoEventNotificationParam&) p_param).GetX(),
-				((LegoEventNotificationParam&) p_param).GetY()
-			));
-		}
 	} break;
 	case c_notificationDragStart: {
 		if ((((LegoEventNotificationParam&) p_param).GetModifier()) & LegoEventNotificationParam::c_lButtonState) {
 			OnLButtonDown(MxPoint32(
-				((LegoEventNotificationParam&) p_param).GetX(),
-				((LegoEventNotificationParam&) p_param).GetY()
-			));
-		}
-		else if ((((LegoEventNotificationParam&) p_param).GetModifier()) & LegoEventNotificationParam::c_rButtonState) {
-			OnRButtonDown(MxPoint32(
 				((LegoEventNotificationParam&) p_param).GetX(),
 				((LegoEventNotificationParam&) p_param).GetY()
 			));
@@ -111,9 +99,6 @@ void LegoCameraController::OnMouseMove(MxU8 p_modifier, MxPoint32 p_point)
 {
 	if (p_modifier & LegoEventNotificationParam::c_lButtonState) {
 		LeftDrag(p_point.GetX(), p_point.GetY());
-	}
-	else if (p_modifier & LegoEventNotificationParam::c_rButtonState) {
-		RightDrag(p_point.GetX(), p_point.GetY());
 	}
 }
 

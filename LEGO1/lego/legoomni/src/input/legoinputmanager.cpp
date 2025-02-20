@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "legoinputmanager.h"
 
 #include "legocameracontroller.h"
@@ -42,7 +44,7 @@ LegoInputManager::LegoInputManager()
 	m_directInput = NULL;
 	m_directInputDevice = NULL;
 	m_kbStateSuccess = FALSE;
-	m_unk0x195 = 0;
+	m_turnLock = 0;
 	m_joyid = -1;
 	m_joystickIndex = -1;
 	m_useJoystick = FALSE;
@@ -167,30 +169,30 @@ MxResult LegoInputManager::GetNavigationKeyStates(MxU32& p_keyFlags)
 	}
 
 	if (g_unk0x100f67b8) {
-		if (m_keyboardState[DIK_LEFT] & 0x80 && GetAsyncKeyState(VK_LEFT) == 0) {
-			m_keyboardState[DIK_LEFT] = 0;
+		if (m_keyboardState[DIK_A] & 0x80 && GetAsyncKeyState('A') == 0) {
+			m_keyboardState[DIK_A] = 0;
 		}
 
-		if (m_keyboardState[DIK_RIGHT] & 0x80 && GetAsyncKeyState(VK_RIGHT) == 0) {
-			m_keyboardState[DIK_RIGHT] = 0;
+		if (m_keyboardState[DIK_D] & 0x80 && GetAsyncKeyState('D') == 0) {
+			m_keyboardState[DIK_D] = 0;
 		}
 	}
 
 	MxU32 keyFlags = 0;
 
-	if ((m_keyboardState[DIK_NUMPAD8] | m_keyboardState[DIK_UP]) & 0x80) {
+	if (m_keyboardState[DIK_W] & 0x80) {
 		keyFlags |= c_up;
 	}
 
-	if ((m_keyboardState[DIK_NUMPAD2] | m_keyboardState[DIK_DOWN]) & 0x80) {
+	if (m_keyboardState[DIK_S] & 0x80) {
 		keyFlags |= c_down;
 	}
 
-	if ((m_keyboardState[DIK_NUMPAD4] | m_keyboardState[DIK_LEFT]) & 0x80) {
+	if (m_keyboardState[DIK_A] & 0x80) {
 		keyFlags |= c_left;
 	}
 
-	if ((m_keyboardState[DIK_NUMPAD6] | m_keyboardState[DIK_RIGHT]) & 0x80) {
+	if (m_keyboardState[DIK_D] & 0x80) {
 		keyFlags |= c_right;
 	}
 
@@ -369,20 +371,6 @@ MxBool LegoInputManager::ProcessOneEvent(LegoEventNotificationParam& p_param)
 
 	if (p_param.GetNotification() == c_notificationKeyPress) {
 		if (!Lego()->IsPaused() || p_param.GetKey() == VK_PAUSE) {
-			if (p_param.GetKey() == VK_SHIFT) {
-				if (m_unk0x195) {
-					m_unk0x80 = FALSE;
-					p_param.SetNotification(c_notificationDragEnd);
-
-					if (m_camera) {
-						m_camera->Notify(p_param);
-					}
-				}
-
-				m_unk0x195 = !m_unk0x195;
-				return TRUE;
-			}
-
 			LegoNotifyListCursor cursor(m_keyboardNotifyList);
 			MxCore* target;
 
@@ -411,12 +399,7 @@ MxBool LegoInputManager::ProcessOneEvent(LegoEventNotificationParam& p_param)
 				}
 
 				return TRUE;
-			}
-
-			if (m_unk0x195 && p_param.GetNotification() == c_notificationButtonDown) {
-				m_unk0x195 = 0;
-				return TRUE;
-			}
+			}	
 
 			if (m_world != NULL && m_world->Notify(p_param) != 0) {
 				return TRUE;
@@ -512,14 +495,27 @@ MxBool LegoInputManager::FUN_1005cdf0(LegoEventNotificationParam& p_param)
 		m_unk0x80 = FALSE;
 		m_unk0x81 = FALSE;
 		break;
+	case c_notificationMouseLocked:
+		m_turnLock = TRUE;
+		break;
+	case c_notificationMouseUnlocked:
+		m_unk0x80 = FALSE;
+		p_param.SetNotification(c_notificationDragEnd);
+
+		if (m_camera) {
+			m_camera->Notify(p_param);
+		}
+
+		m_turnLock = FALSE;
+		break;
 	case c_notificationMouseMove:
-		if (m_unk0x195) {
+		if (m_turnLock) {
 			p_param.SetModifier(LegoEventNotificationParam::c_lButtonState);
 		}
 
-		if ((m_unk0x195 || m_unk0x81) && p_param.GetModifier() & LegoEventNotificationParam::c_lButtonState) {
+		if (m_turnLock && p_param.GetModifier() & LegoEventNotificationParam::c_lButtonState) {
 			if (!m_unk0x80) {
-				if (m_unk0x195) {
+				if (m_turnLock) {
 					m_x = p_param.GetX();
 					m_y = p_param.GetY();
 				}
@@ -528,7 +524,7 @@ MxBool LegoInputManager::FUN_1005cdf0(LegoEventNotificationParam& p_param)
 				MxS32 diffY = p_param.GetY() - m_y;
 				MxS32 t = diffX * diffX + diffY * diffY;
 
-				if (m_unk0x195 || t > m_unk0x74) {
+				if (m_turnLock || t > m_unk0x74) {
 					StopAutoDragTimer();
 					m_unk0x80 = TRUE;
 					p_param.SetNotification(c_notificationDragStart);
