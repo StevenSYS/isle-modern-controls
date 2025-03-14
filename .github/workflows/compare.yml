@@ -1,9 +1,6 @@
 name: Compare
 
 on:
-  push:
-    branches:
-      - master
   workflow_dispatch:
     inputs:
       builds_per_job:
