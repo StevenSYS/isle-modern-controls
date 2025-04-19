@@ -95,14 +95,44 @@ public:
 		return m_data->CreateTextureFromSurface(pSurface, pTexture2);
 	}
 
-	IDirect3DRM2* ImplementationData() const { return m_data; }
+	typedef IDirect3DRM2* RendererDataType;
+
+	const RendererDataType& ImplementationData() const { return m_data; }
+
+	// FUNCTION: BETA10 0x10174c10
+	RendererDataType& ImplementationData() { return m_data; }
 
 public:
 	inline Result Create();
 	inline void Destroy();
+	inline Result CreateLight(LightType type, float r, float g, float b, LightImpl& rLight);
+	inline Result CreateView(
+		const DeviceImpl& rDevice,
+		const CameraImpl& rCamera,
+		unsigned long x,
+		unsigned long y,
+		unsigned long width,
+		unsigned long height,
+		ViewImpl& rView
+	);
+	inline Result CreateMeshBuilder(MeshBuilderImpl& rMesh);
+	inline Result CreateCamera(CameraImpl& rCamera);
+	inline Result CreateTexture(TextureImpl& rTexture);
+	inline Result CreateTexture(
+		TextureImpl& rTexture,
+		int width,
+		int height,
+		int bitsPerTexel,
+		const void* pTexels,
+		int texelsArePersistent,
+		int paletteEntryCount,
+		const PaletteEntry* pEntries
+	);
+	inline Result CreateDevice(const DeviceDirect3DCreateData& rCreateData, DeviceImpl& rDevice);
+	inline Result CreateDevice(const DeviceDirectDrawCreateData& rCreateData, DeviceImpl& rDevice);
 
 private:
-	IDirect3DRM2* m_data;
+	RendererDataType m_data;
 };
 
 extern IDirect3DRM2* g_pD3DRM;
@@ -153,7 +183,14 @@ public:
 	void HandleActivate(WORD) override;
 	void HandlePaint(HDC) override;
 
-	IDirect3DRMDevice2* ImplementationData() const { return m_data; }
+	typedef IDirect3DRMDevice2* DeviceDataType;
+
+	// FUNCTION: BETA10 0x101708e0
+	const DeviceDataType& ImplementationData() const { return m_data; }
+
+	// FUNCTION: BETA10 0x100d9540
+	DeviceDataType& ImplementationData() { return m_data; }
+
 	void SetImplementationData(IDirect3DRMDevice2* device) { m_data = device; }
 
 	inline void Destroy();
@@ -161,7 +198,7 @@ public:
 	friend class RendererImpl;
 
 private:
-	IDirect3DRMDevice2* m_data;
+	DeviceDataType m_data;
 };
 
 // FUNCTION: BETA10 0x101708c0
@@ -219,7 +256,13 @@ public:
 		int& rPickedGroupCount
 	) override;
 
-	IDirect3DRMViewport* ImplementationData() const { return m_data; }
+	typedef IDirect3DRMViewport* ViewDataType;
+
+	const ViewDataType& ImplementationData() const { return m_data; }
+
+	// FUNCTION: BETA10 0x101711c0
+	ViewDataType& ImplementationData() { return m_data; }
+
 	void SetImplementationData(IDirect3DRMViewport* viewport) { m_data = viewport; }
 
 	static Result ViewportCreateAppData(IDirect3DRM2*, IDirect3DRMViewport*, IDirect3DRMFrame2*);
@@ -241,7 +284,7 @@ public:
 	friend class RendererImpl;
 
 private:
-	IDirect3DRMViewport* m_data;
+	ViewDataType m_data;
 };
 
 // FUNCTION: BETA10 0x101711a0
@@ -274,14 +317,20 @@ public:
 	// vtable+0x08
 	Result SetTransformation(FloatMatrix4&) override;
 
-	IDirect3DRMFrame2* ImplementationData() const { return m_data; }
+	typedef IDirect3DRMFrame2* CameraDataType;
+
+	// FUNCTION: BETA10 0x10170960
+	const CameraDataType& ImplementationData() const { return m_data; }
+
+	// FUNCTION: BETA10 0x10170980
+	CameraDataType& ImplementationData() { return m_data; }
 
 	inline void Destroy();
 
 	friend class RendererImpl;
 
 private:
-	IDirect3DRMFrame2* m_data;
+	CameraDataType m_data;
 };
 
 // FUNCTION: BETA10 0x10170940
@@ -300,13 +349,13 @@ void CameraImpl::Destroy()
 }
 
 // VTABLE: LEGO1 0x100dbaf8
-// VTABLE: BETA10 0x101c31e0
+// VTABLE: BETA10 0x101c3270
 class LightImpl : public Light {
 public:
-	// FUNCTION: BETA10 0x1016b260
+	// FUNCTION: BETA10 0x1016b460
 	LightImpl() : m_data(0) {}
 
-	// FUNCTION: BETA10 0x1016c7e0
+	// FUNCTION: BETA10 0x1016f5c0
 	~LightImpl() override { Destroy(); }
 
 	void* ImplementationDataPtr() override;
@@ -315,23 +364,29 @@ public:
 	Result SetTransformation(FloatMatrix4&) override;
 	Result SetColor(float r, float g, float b) override;
 
-	IDirect3DRMFrame2* ImplementationData() const { return m_data; }
+	typedef IDirect3DRMFrame2* LightDataType;
+
+	// FUNCTION: BETA10 0x10171b90
+	const LightDataType& ImplementationData() const { return m_data; }
+
+	// FUNCTION: BETA10 0x10171240
+	LightDataType& ImplementationData() { return m_data; }
 
 	inline void Destroy();
 
 	friend class RendererImpl;
 
 private:
-	IDirect3DRMFrame2* m_data;
+	LightDataType m_data;
 };
 
-// FUNCTION: BETA10 0x10170390
+// FUNCTION: BETA10 0x10171220
 inline void LightDestroy(IDirect3DRMFrame2* pLight)
 {
 	pLight->Release();
 }
 
-// FUNCTION: BETA10 0x10170350
+// FUNCTION: BETA10 0x101711e0
 void LightImpl::Destroy()
 {
 	if (m_data) {
@@ -373,9 +428,12 @@ public:
 	typedef MeshData* MeshDataType;
 
 	const MeshDataType& ImplementationData() const { return m_data; }
+
+	// FUNCTION: BETA10 0x10171b70
 	MeshDataType& ImplementationData() { return m_data; }
 
 	inline void Destroy();
+	inline Mesh* DeepClone(const MeshBuilderImpl& rMesh);
 
 	friend class RendererImpl;
 
@@ -429,14 +487,20 @@ public:
 	// vtable+0x30
 	Result Bounds(D3DVECTOR* p_min, D3DVECTOR* p_max) override;
 
-	IDirect3DRMFrame2* ImplementationData() const { return m_data; }
+	typedef IDirect3DRMFrame2* GroupDataType;
+
+	// FUNCTION: BETA10 0x1016fc20
+	const GroupDataType& ImplementationData() const { return m_data; }
+
+	// FUNCTION: BETA10 0x1016fce0
+	GroupDataType& ImplementationData() { return m_data; }
 
 	inline void Destroy();
 
 	friend class RendererImpl;
 
 private:
-	IDirect3DRMFrame2* m_data;
+	GroupDataType m_data;
 };
 
 // FUNCTION: BETA10 0x1016c2b0
@@ -455,13 +519,13 @@ void GroupImpl::Destroy()
 }
 
 // VTABLE: LEGO1 0x100dbb18
-// VTABLE: BETA10 0x101c3270
+// VTABLE: BETA10 0x101c31e0
 class MeshBuilderImpl : public MeshBuilder {
 public:
-	// FUNCTION: BETA10 0x1016b460
+	// FUNCTION: BETA10 0x1016b260
 	MeshBuilderImpl() : m_data(0) {}
 
-	// FUNCTION: BETA10 0x1016f5c0
+	// FUNCTION: BETA10 0x1016c7e0
 	~MeshBuilderImpl() override { Destroy(); }
 
 	void* ImplementationDataPtr() override;
@@ -482,7 +546,13 @@ public:
 	// vtable+0x10
 	MeshBuilder* Clone() override;
 
-	IDirect3DRMMesh* ImplementationData() const { return m_data; }
+	typedef IDirect3DRMMesh* MeshBuilderDataType;
+
+	// FUNCTION: BETA10 0x10170420
+	const MeshBuilderDataType& ImplementationData() const { return m_data; }
+
+	// FUNCTION: BETA10 0x10170440
+	MeshBuilderDataType& ImplementationData() { return m_data; }
 
 	inline void Destroy();
 
@@ -501,16 +571,16 @@ private:
 		ShadingModel shadingModel
 	);
 
-	IDirect3DRMMesh* m_data;
+	MeshBuilderDataType m_data;
 };
 
-// FUNCTION: BETA10 0x10171220
+// FUNCTION: BETA10 0x10170390
 inline void MeshBuilderDestroy(IDirect3DRMMesh* pMeshBuilder)
 {
 	pMeshBuilder->Release();
 }
 
-// FUNCTION: BETA10 0x101711e0
+// FUNCTION: BETA10 0x10170350
 void MeshBuilderImpl::Destroy()
 {
 	if (m_data) {
@@ -570,7 +640,14 @@ public:
 	) override;
 	Result SetPalette(int entryCount, PaletteEntry* entries) override;
 
-	IDirect3DRMTexture* ImplementationData() const { return m_data; }
+	typedef IDirect3DRMTexture* TextureDataType;
+
+	// FUNCTION: BETA10 0x1016fd60
+	const TextureDataType& ImplementationData() const { return m_data; }
+
+	// FUNCTION: BETA10 0x1016fe20
+	TextureDataType& ImplementationData() { return m_data; }
+
 	void SetImplementation(IDirect3DRMTexture* pData) { m_data = pData; }
 
 	inline void Destroy();
@@ -580,7 +657,7 @@ public:
 	static Result SetImage(IDirect3DRMTexture* pSelf, TglD3DRMIMAGE* pImage);
 
 private:
-	IDirect3DRMTexture* m_data;
+	TextureDataType m_data;
 };
 
 // FUNCTION: BETA10 0x1016fd40
@@ -599,6 +676,7 @@ void TextureImpl::Destroy()
 }
 
 // Translation helpers
+// FUNCTION: BETA10 0x1016fc40
 inline D3DRMRENDERQUALITY Translate(ShadingModel tglShadingModel)
 {
 	D3DRMRENDERQUALITY renderQuality;
@@ -668,6 +746,36 @@ inline D3DVECTOR* Translate(const float tglVector[3], D3DVECTOR& rD3DVector)
 	return &rD3DVector;
 }
 
+// FUNCTION: BETA10 0x1016fd80
+inline D3DRMLIGHTTYPE Translate(LightType tglLightType)
+{
+	D3DRMLIGHTTYPE lightType;
+
+	// ??? use lookup table
+	switch (tglLightType) {
+	case Ambient:
+		lightType = D3DRMLIGHT_AMBIENT;
+		break;
+	case Point:
+		lightType = D3DRMLIGHT_POINT;
+		break;
+	case Spot:
+		lightType = D3DRMLIGHT_SPOT;
+		break;
+	case Directional:
+		lightType = D3DRMLIGHT_DIRECTIONAL;
+		break;
+	case ParallelPoint:
+		lightType = D3DRMLIGHT_PARALLELPOINT;
+		break;
+	default:
+		lightType = D3DRMLIGHT_AMBIENT;
+		break;
+	}
+
+	return lightType;
+}
+
 // SYNTHETIC: LEGO1 0x100a16d0
 // SYNTHETIC: BETA10 0x10169aa0
 // TglImpl::RendererImpl::`scalar deleting destructor'
@@ -689,11 +797,11 @@ inline D3DVECTOR* Translate(const float tglVector[3], D3DVECTOR& rD3DVector)
 // TglImpl::CameraImpl::`scalar deleting destructor'
 
 // SYNTHETIC: LEGO1 0x100a2640
-// SYNTHETIC: BETA10 0x1016b5f0
+// SYNTHETIC: BETA10 0x1016ba30
 // TglImpl::LightImpl::`scalar deleting destructor'
 
 // SYNTHETIC: LEGO1 0x100a2720
-// SYNTHETIC: BETA10 0x1016ba30
+// SYNTHETIC: BETA10 0x1016b5f0
 // TglImpl::MeshBuilderImpl::`scalar deleting destructor'
 
 // SYNTHETIC: LEGO1 0x100a2800
@@ -703,6 +811,9 @@ inline D3DVECTOR* Translate(const float tglVector[3], D3DVECTOR& rD3DVector)
 // SYNTHETIC: LEGO1 0x100a3d80
 // SYNTHETIC: BETA10 0x1016fa90
 // TglImpl::MeshImpl::`scalar deleting destructor'
+
+// SYNTHETIC: BETA10 0x10169960
+// ViewportAppData::`scalar deleting destructor'
 
 // GLOBAL: LEGO1 0x100dd1e0
 // IID_IDirect3DRMMeshBuilder
