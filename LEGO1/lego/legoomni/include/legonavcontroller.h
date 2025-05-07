@@ -48,7 +48,7 @@ public:
 	);
 
 	static void GetDefaults(
-		int* p_dz,
+		int* p_dz, /* Unused */
 		float* p_lv,
 		float* p_rv,
 		float* p_la,
@@ -61,7 +61,7 @@ public:
 		MxBool* p_urs
 	);
 	static void SetDefaults(
-		int p_dz,
+		int p_dz, /* Unused */
 		float p_lv,
 		float p_rv,
 		float p_la,
@@ -80,9 +80,6 @@ public:
 
 	// FUNCTION: BETA10 0x100b0f40
 	void SetLinearVel(MxFloat p_linearVel) { m_linearVel = p_linearVel; }
-
-	// FUNCTION: BETA10 0x100c99e0
-	void SetDeadZone(MxS32 p_deadZone) { m_deadZone = p_deadZone; }
 
 	// FUNCTION: BETA10 0x100c7880
 	void SetTrackDefault(MxS32 p_trackDefault) { m_trackDefault = p_trackDefault; }
@@ -115,9 +112,6 @@ public:
 		m_trackDefault = FALSE;
 	}
 
-	// FUNCTION: BETA10 0x100c9a10
-	int GetDefaultDeadZone() { return g_defdeadZone; }
-
 	// SYNTHETIC: LEGO1 0x10054c10
 	// LegoNavController::`scalar deleting destructor'
 
@@ -126,12 +120,10 @@ protected:
 	float CalculateNewTargetVel(int p_pos, int p_center, float p_max);
 	float CalculateNewAccel(int p_pos, int p_center, float p_max, int p_min);
 
-	MxResult ProcessJoystickInput(MxBool& p_und);
 	MxResult ProcessKeyboardInput();
 
 	int m_hMax;                  // 0x08
 	int m_vMax;                  // 0x0c
-	int m_deadZone;              // 0x10
 	float m_zeroThreshold;       // 0x14
 	float m_linearVel;           // 0x18
 	float m_rotationalVel;       // 0x1c
@@ -158,7 +150,6 @@ protected:
 	MxBool m_unk0x6c;            // 0x6c
 
 	// one copy of defaults (these can be set by App.)
-	static int g_defdeadZone;
 	static float g_defzeroThreshold;
 	static float g_defmaxLinearVel;
 	static float g_defmaxRotationalVel;

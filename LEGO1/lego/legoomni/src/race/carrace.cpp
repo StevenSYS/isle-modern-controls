@@ -80,7 +80,6 @@ MxResult CarRace::Create(MxDSAction& p_dsAction)
 {
 	MxResult result = LegoRace::Create(p_dsAction);
 
-	NavController()->SetDeadZone(1);
 	NavController()->SetTrackDefault(0);
 	GameState()->m_currentArea = LegoGameState::e_carrace;
 	GameState()->StopArea(LegoGameState::e_undefined);
@@ -242,7 +241,6 @@ MxLong CarRace::HandlePathStruct(LegoPathStructNotificationParam& p_param)
 					InputManager()->DisableInputProcessing();
 					InputManager()->SetUnknown336(TRUE);
 					VariableTable()->SetVariable(g_strHIT_WALL_SOUND, "");
-					NavController()->SetDeadZone(NavController()->GetDefaultDeadZone());
 					NavController()->SetTrackDefault(1);
 					LegoRaceCar::FUN_10012de0();
 					m_raceState->m_unk0x28 = 2;
@@ -344,7 +342,6 @@ MxLong CarRace::HandleClick(LegoEventNotificationParam& p_param)
 			m_act1State->m_unk0x018 = 0;
 			VariableTable()->SetVariable(g_raceState, "");
 			VariableTable()->SetVariable(g_strHIT_WALL_SOUND, "");
-			NavController()->SetDeadZone(NavController()->GetDefaultDeadZone());
 			NavController()->SetTrackDefault(1);
 			LegoRaceCar::FUN_10012de0();
 			m_destLocation = LegoGameState::e_infomain;
@@ -356,7 +353,6 @@ MxLong CarRace::HandleClick(LegoEventNotificationParam& p_param)
 			m_act1State->m_unk0x018 = 0;
 			VariableTable()->SetVariable(g_raceState, "");
 			VariableTable()->SetVariable(g_strHIT_WALL_SOUND, "");
-			NavController()->SetDeadZone(NavController()->GetDefaultDeadZone());
 			NavController()->SetTrackDefault(1);
 			LegoRaceCar::FUN_10012de0();
 			m_destLocation = LegoGameState::e_carraceExterior;
@@ -419,7 +415,6 @@ MxBool CarRace::Escape()
 	VariableTable()->SetVariable(g_strHIT_WALL_SOUND, "");
 
 	VariableTable()->SetVariable(g_raceState, "");
-	NavController()->SetDeadZone(NavController()->GetDefaultDeadZone());
 
 	NavController()->SetTrackDefault(1);
 	LegoRaceCar::FUN_10012de0();

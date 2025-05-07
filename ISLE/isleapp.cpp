@@ -90,8 +90,6 @@ IsleApp::IsleApp()
 	m_drawCursor = FALSE;
 	m_use3dSound = TRUE;
 	m_useMusic = TRUE;
-	m_useJoystick = FALSE;
-	m_joystickIndex = 0;
 	m_wideViewAngle = TRUE;
 	m_islandQuality = 1;
 	m_islandTexture = 1;
@@ -326,7 +324,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine
 			if (g_mousemoved) {
 				g_mousemoved = FALSE;
 				if (g_mouselocked) {
-					SetCursorPos(317, 240);
+					SetCursorPos(320, 240);
 					g_isle->Tick(0);
 				}
 			}
@@ -367,7 +365,7 @@ BOOL StartDirectSound()
 // FUNCTION: ISLE 0x401d20
 LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
-	NotificationId type;
+	NotificationId type = (NotificationId)0;
 	unsigned char keyCode = 0;
 
 	if (!g_isle) {
@@ -521,7 +519,7 @@ LRESULT WINAPI WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		return DefWindowProcA(hWnd, uMsg, wParam, lParam);
 	}
 
-	if (g_isle) {
+	if (g_isle && type != 0) {
 		if (InputManager()) {
 			InputManager()->QueueEvent(type, wParam, LOWORD(lParam), HIWORD(lParam), keyCode);
 		}
@@ -585,7 +583,7 @@ MxResult IsleApp::SetupWindow(HINSTANCE hInstance, LPSTR lpCmdLine)
 	}
 
 	if (m_fullScreen) {
-		AdjustWindowRectEx(&g_windowRect, WS_CAPTION | WS_SYSMENU, 0, WS_EX_APPWINDOW);
+		AdjustWindowRectEx(&g_windowRect, WS_POPUP, 0, WS_EX_APPWINDOW);
 
 		m_windowHandle = CreateWindowExA(
 			WS_EX_APPWINDOW,
@@ -666,10 +664,7 @@ MxResult IsleApp::SetupWindow(HINSTANCE hInstance, LPSTR lpCmdLine)
 	LegoROI::configureLegoROI(iVar10);
 	LegoAnimationManager::configureLegoAnimationManager(m_islandQuality);
 	if (LegoOmni::GetInstance()) {
-		if (LegoOmni::GetInstance()->GetInputManager()) {
-			LegoOmni::GetInstance()->GetInputManager()->SetUseJoystick(m_useJoystick);
-			LegoOmni::GetInstance()->GetInputManager()->SetJoystickIndex(m_joystickIndex);
-		}
+		LegoOmni::GetInstance()->GetInputManager();
 	}
 	if (m_fullScreen) {
 		MoveWindow(
@@ -767,8 +762,6 @@ void IsleApp::LoadConfig()
 	ReadRegBool("Wide View Angle", &m_wideViewAngle);
 	ReadRegBool("3DSound", &m_use3dSound);
 	ReadRegBool("Music", &m_useMusic);
-	ReadRegBool("UseJoystick", &m_useJoystick);
-	ReadRegInt("JoystickIndex", &m_joystickIndex);
 	ReadRegBool("Draw Cursor", &m_drawCursor);
 
 	int backBuffersInVRAM;

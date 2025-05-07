@@ -102,8 +102,6 @@ public:
 	void Destroy() override;
 	void CreateAndAcquireKeyboard(HWND p_hwnd);
 	void ReleaseDX();
-	MxResult GetJoystickId();
-	MxResult GetJoystickState(MxU32* p_joystickX, MxU32* p_joystickY, DWORD* p_buttonsState, MxU32* p_povPosition);
 	void StartAutoDragTimer();
 	void StopAutoDragTimer();
 	void EnableInputProcessing();
@@ -115,8 +113,6 @@ public:
 	void SetUnknown88(MxBool p_unk0x88) { m_unk0x88 = p_unk0x88; }
 	void SetUnknown335(MxBool p_unk0x335) { m_unk0x335 = p_unk0x335; }
 	void SetUnknown336(MxBool p_unk0x336) { m_unk0x336 = p_unk0x336; }
-	void SetUseJoystick(MxBool p_useJoystick) { m_useJoystick = p_useJoystick; }
-	void SetJoystickIndex(MxS32 p_joystickIndex) { m_joystickIndex = p_joystickIndex; }
 
 	void DisableInputProcessing()
 	{
@@ -162,9 +158,7 @@ private:
 	MxU8 m_keyboardState[256];               // 0x95
 	MxBool m_turnLock;                       // 0x195
 	MxS32 m_joyid;                           // 0x198
-	MxS32 m_joystickIndex;                   // 0x19c
 	JOYCAPS m_joyCaps;                       // 0x200
-	MxBool m_useJoystick;                    // 0x334
 	MxBool m_unk0x335;                       // 0x335
 	MxBool m_unk0x336;                       // 0x336
 };

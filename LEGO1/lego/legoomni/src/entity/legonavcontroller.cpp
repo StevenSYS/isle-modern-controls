@@ -47,9 +47,6 @@ DECOMP_SIZE_ASSERT(LegoNavController, 0x70)
 
 //////////////////////////////////////////////////////////////////////
 
-// GLOBAL: LEGO1 0x100f4c28
-int LegoNavController::g_defdeadZone = 0;
-
 // GLOBAL: LEGO1 0x100f4c2c
 float LegoNavController::g_defzeroThreshold = 0.001f;
 
@@ -167,7 +164,6 @@ void LegoNavController::SetControlMax(int p_hMax, int p_vMax)
 // FUNCTION: BETA10 0x1009ad76
 void LegoNavController::SetToDefaultParams()
 {
-	m_deadZone = g_defdeadZone;
 	m_zeroThreshold = g_defzeroThreshold;
 	m_maxRotationalAccel = g_defmaxRotationalAccel;
 	m_maxLinearAccel = g_defmaxLinearAccel;
@@ -183,7 +179,7 @@ void LegoNavController::SetToDefaultParams()
 
 // FUNCTION: LEGO1 0x10054d40
 void LegoNavController::GetDefaults(
-	int* p_dz,
+	int* p_dz, /* Unused */
 	float* p_lv,
 	float* p_rv,
 	float* p_la,
@@ -196,7 +192,6 @@ void LegoNavController::GetDefaults(
 	MxBool* p_urs
 )
 {
-	*p_dz = g_defdeadZone;
 	*p_lv = g_defmaxLinearVel;
 	*p_rv = g_defmaxRotationalVel;
 	*p_la = g_defmaxLinearAccel;
@@ -211,7 +206,7 @@ void LegoNavController::GetDefaults(
 
 // FUNCTION: LEGO1 0x10054dd0
 void LegoNavController::SetDefaults(
-	int p_dz,
+	int p_dz, /* Unused */
 	float p_lv,
 	float p_rv,
 	float p_la,
@@ -224,7 +219,6 @@ void LegoNavController::SetDefaults(
 	MxBool p_urs
 )
 {
-	g_defdeadZone = p_dz;
 	g_defmaxLinearVel = p_lv;
 	g_defmaxRotationalVel = p_rv;
 	g_defmaxLinearAccel = p_la;
@@ -260,13 +254,9 @@ float LegoNavController::CalculateNewTargetVel(int p_pos, int p_center, float p_
 	float newVel;
 	int diff = p_pos - p_center;
 
-	if (diff > m_deadZone) {
-		newVel = (diff - m_deadZone) * p_max / (p_center - m_deadZone);
-	}
-	else if (diff < -m_deadZone) {
-		newVel = (diff + m_deadZone) * p_max / (p_center - m_deadZone);
-	}
-	else {
+	if (diff) {
+		newVel = diff * p_max / p_center;
+	} else {
 		newVel = 0.0;
 	}
 
@@ -332,9 +322,7 @@ MxBool LegoNavController::CalculateNewPosDir(
 	float deltaTime = (currentTime - m_lastTime) / 1000.0;
 	m_lastTime = currentTime;
 
-	if (ProcessKeyboardInput() == FAILURE) {
-		ProcessJoystickInput(und);
-	}
+	ProcessKeyboardInput();
 
 	if (m_useRotationalVel) {
 		m_rotationalVel = CalculateNewVel(m_targetRotationalVel, m_rotationalVel, m_rotationalAccel * 40.0f, deltaTime);
@@ -508,53 +496,6 @@ LegoLocation* LegoNavController::GetLocation(MxU32 p_location)
 MxS32 LegoNavController::GetNumLocations()
 {
 	return sizeOfArray(g_locations);
-}
-
-// FUNCTION: LEGO1 0x10055750
-MxResult LegoNavController::ProcessJoystickInput(MxBool& p_und)
-{
-	LegoOmni* instance = LegoOmni::GetInstance();
-
-	if (instance->GetInputManager()) {
-		MxS32 joystickX;
-		MxS32 joystickY;
-		DWORD buttonState;
-		MxS32 povPosition;
-
-		if (instance->GetInputManager()
-				->GetJoystickState((MxU32*) &joystickX, (MxU32*) &joystickY, &buttonState, (MxU32*) &povPosition) !=
-			FAILURE) {
-			MxU32 yVal = (joystickY * m_vMax) / 100;
-			MxU32 xVal = (joystickX * m_hMax) / 100;
-
-			if (joystickX <= 45 || joystickX >= 55 || joystickY <= 45 || joystickY >= 55) {
-				m_targetLinearVel = CalculateNewTargetVel(m_vMax - yVal, m_vMax / 2, m_maxLinearVel);
-				m_linearAccel = CalculateNewAccel(m_vMax - yVal, m_vMax / 2, m_maxLinearAccel, (int) m_minLinearAccel);
-				m_targetRotationalVel = CalculateNewTargetVel(xVal, m_hMax / 2, m_maxRotationalVel);
-				m_rotationalAccel =
-					CalculateNewAccel(xVal, m_hMax / 2, m_maxRotationalAccel, (int) m_minRotationalAccel);
-			}
-			else {
-				m_targetRotationalVel = 0.0;
-				m_targetLinearVel = 0.0;
-				m_linearAccel = m_maxLinearDeccel;
-				m_rotationalAccel = m_maxRotationalDeccel;
-			}
-
-			if (povPosition >= 0) {
-				LegoWorld* world = CurrentWorld();
-
-				if (world && world->GetCameraController()) {
-					world->GetCameraController()->FUN_10012320(DTOR(povPosition));
-					p_und = TRUE;
-				}
-			}
-
-			return SUCCESS;
-		}
-	}
-
-	return FAILURE;
 }
 
 // FUNCTION: LEGO1 0x100558b0

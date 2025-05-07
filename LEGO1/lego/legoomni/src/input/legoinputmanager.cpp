@@ -46,8 +46,6 @@ LegoInputManager::LegoInputManager()
 	m_kbStateSuccess = FALSE;
 	m_turnLock = 0;
 	m_joyid = -1;
-	m_joystickIndex = -1;
-	m_useJoystick = FALSE;
 	m_unk0x335 = FALSE;
 	m_unk0x336 = FALSE;
 	m_unk0x74 = 0x19;
@@ -76,7 +74,6 @@ MxResult LegoInputManager::Create(HWND p_hwnd)
 	}
 
 	CreateAndAcquireKeyboard(p_hwnd);
-	GetJoystickId();
 
 	if (!m_keyboardNotifyList || !m_eventQueue || !m_directInputDevice) {
 		Destroy();
@@ -203,93 +200,6 @@ MxResult LegoInputManager::GetNavigationKeyStates(MxU32& p_keyFlags)
 	p_keyFlags = keyFlags;
 
 	return SUCCESS;
-}
-
-// FUNCTION: LEGO1 0x1005c240
-MxResult LegoInputManager::GetJoystickId()
-{
-	JOYINFOEX joyinfoex;
-
-	if (m_useJoystick != FALSE) {
-		MxS32 joyid = m_joystickIndex;
-		if (joyid >= 0) {
-			joyinfoex.dwSize = 0x34;
-			joyinfoex.dwFlags = 0xFF;
-
-			if (joyGetPosEx(joyid, &joyinfoex) == JOYERR_NOERROR &&
-				joyGetDevCaps(joyid, &m_joyCaps, 0x194) == JOYERR_NOERROR) {
-				m_joyid = joyid;
-				return SUCCESS;
-			}
-		}
-
-		for (joyid = JOYSTICKID1; joyid < 16; joyid++) {
-			joyinfoex.dwSize = 0x34;
-			joyinfoex.dwFlags = 0xFF;
-			if (joyGetPosEx(joyid, &joyinfoex) == JOYERR_NOERROR &&
-				joyGetDevCaps(joyid, &m_joyCaps, 0x194) == JOYERR_NOERROR) {
-				m_joyid = joyid;
-				return SUCCESS;
-			}
-		}
-	}
-
-	return FAILURE;
-}
-
-// FUNCTION: LEGO1 0x1005c320
-MxResult LegoInputManager::GetJoystickState(
-	MxU32* p_joystickX,
-	MxU32* p_joystickY,
-	DWORD* p_buttonsState,
-	MxU32* p_povPosition
-)
-{
-	if (m_useJoystick != FALSE) {
-		if (m_joyid < 0 && GetJoystickId() == -1) {
-			m_useJoystick = FALSE;
-			return FAILURE;
-		}
-
-		JOYINFOEX joyinfoex;
-		joyinfoex.dwSize = 0x34;
-		joyinfoex.dwFlags = JOY_RETURNX | JOY_RETURNY | JOY_RETURNBUTTONS;
-		MxU32 capabilities = m_joyCaps.wCaps;
-
-		if ((capabilities & JOYCAPS_HASPOV) != 0) {
-			joyinfoex.dwFlags = JOY_RETURNX | JOY_RETURNY | JOY_RETURNPOV | JOY_RETURNBUTTONS;
-
-			if ((capabilities & JOYCAPS_POVCTS) != 0) {
-				joyinfoex.dwFlags = JOY_RETURNX | JOY_RETURNY | JOY_RETURNPOV | JOY_RETURNBUTTONS | JOY_RETURNPOVCTS;
-			}
-		}
-
-		MMRESULT mmresult = joyGetPosEx(m_joyid, &joyinfoex);
-
-		if (mmresult == MMSYSERR_NOERROR) {
-			*p_buttonsState = joyinfoex.dwButtons;
-			MxU32 xmin = m_joyCaps.wXmin;
-			MxU32 ymax = m_joyCaps.wYmax;
-			MxU32 ymin = m_joyCaps.wYmin;
-			MxS32 ydiff = ymax - ymin;
-			*p_joystickX = ((joyinfoex.dwXpos - xmin) * 100) / (m_joyCaps.wXmax - xmin);
-			*p_joystickY = ((joyinfoex.dwYpos - m_joyCaps.wYmin) * 100) / ydiff;
-			if ((m_joyCaps.wCaps & (JOYCAPS_POV4DIR | JOYCAPS_POVCTS)) != 0) {
-				if (joyinfoex.dwPOV == JOY_POVCENTERED) {
-					*p_povPosition = (MxU32) -1;
-					return SUCCESS;
-				}
-				*p_povPosition = joyinfoex.dwPOV / 100;
-				return SUCCESS;
-			}
-			else {
-				*p_povPosition = (MxU32) -1;
-				return SUCCESS;
-			}
-		}
-	}
-
-	return FAILURE;
 }
 
 // FUNCTION: LEGO1 0x1005c470
